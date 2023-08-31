@@ -10,7 +10,7 @@ class CompositeCnnTextClassificationModel(nn.Module):
     def __init__(
             self,
             n_datasets: int,
-            word_to_embedding: Dict[str, torch.tensor],
+            word_to_embedding: List[Dict[str, torch.tensor]],
             n_labels: int,
             max_filter_s: int = 4,
             min_filter_s: int = 2,
@@ -35,12 +35,12 @@ class CompositeCnnTextClassificationModel(nn.Module):
 
         self.feature_extractors = nn.ModuleList([
             CnnTextFeatureExtractionModel(
-                word_to_embedding=word_to_embedding,
+                word_to_embedding=word_to_embedding[idx],
                 max_filter_s=max_filter_s,
                 min_filter_s=min_filter_s,
                 filter_s_step=filter_s_step,
                 n_filter_channels=n_filter_channels,
-            ) for _ in range(n_datasets)
+            ) for idx in range(n_datasets)
         ])
 
         self.relu = nn.ReLU(inplace=True)

@@ -98,7 +98,8 @@ def _add_subparser_for_train_cnn_model(subparsers):
     train_cnn_model_parser.add_argument('--train-data-path', type=file_path, required=True, nargs='+',
                                         action=UnnestSingletonListElement,
                                         help='Path to file containing the training data in FastText format')
-    train_cnn_model_parser.add_argument('--word-embeddings-path', type=file_path, required=True,
+    train_cnn_model_parser.add_argument('--word-embeddings-path', type=file_path, required=True, nargs='+',
+                                        action=UnnestSingletonListElement,
                                         help='Path to file containing the word embeddings in TSV format')
     train_cnn_model_parser.add_argument('--n-labels', type=positive_int, required=True,
                                         help='Number of unique labels in the dataset')
