@@ -19,7 +19,7 @@ from classification_with_embeddings.embedding.embed_util import get_word_to_embe
 
 def train_cnn_model(
         train_data_path: Union[str, List[str]],
-        word_embeddings_path: str,
+        word_embeddings_path: Union[str, List[str]],
         n_labels: int,
         val_data_path: Optional[Union[str, List[str]]] = None,
         output_dir: str = '.',
@@ -51,8 +51,16 @@ def train_cnn_model(
     logger.info('Using device: %s', torch_device)
 
     # initialize mapping of word to their embeddings
-    word_to_embedding = {k: torch.tensor(v).float().to(torch_device) for k, v in
-                         get_word_to_embedding(word_embeddings_path, False).items()}
+    if isinstance(word_embeddings_path, str):
+        word_to_embedding = {k: torch.tensor(v).float().to(torch_device) for k, v in
+                             get_word_to_embedding(word_embeddings_path, False).items()}
+    else:
+        word_to_embedding = []
+        for path in word_embeddings_path:
+            word_to_embedding_nxt = {k: torch.tensor(v).float().to(torch_device) for k, v in
+                                     get_word_to_embedding(path, False).items()}
+            word_to_embedding.append(word_to_embedding_nxt)
+
 
     # initialize model
     if not (isinstance(train_data_path, str) or isinstance(train_data_path, list)):
@@ -90,7 +98,7 @@ def train_cnn_model(
 
     # initialize progress bar
     num_training_steps = n_epochs * len(train_data_loader)
-    progress_bar = tqdm(range(num_training_steps), desc='Evaluating model', unit=' steps')
+    progress_bar = tqdm(range(num_training_steps), desc='Training model', unit=' steps')
 
     # train model
     model.train()
