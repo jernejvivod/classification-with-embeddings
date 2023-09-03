@@ -1,5 +1,8 @@
 {
-  "embedding__embedding_kwargs": {
+  "embedding__embedding_kwargs_1": {
+    "vector_size": 300
+  },
+  "embedding__embedding_kwargs_2": {
     "vector_size": 300
   }
 }

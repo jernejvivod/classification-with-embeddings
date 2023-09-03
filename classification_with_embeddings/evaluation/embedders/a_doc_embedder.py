@@ -64,6 +64,6 @@ class ADocEmbedder(ABC, BaseEstimator, TransformerMixin):
                 raise ValueError('Method \'{}\' not implemented.'.format(method))
         elif isinstance(method, List):
             from classification_with_embeddings.evaluation.embedders.composite_embedder import CompositeEmbedder
-            return CompositeEmbedder(embedders=[ADocEmbedder.factory(m) for m in method])
+            return CompositeEmbedder(embedders=[ADocEmbedder.factory(m, **kwargs) for m in method])
         else:
             raise ValueError('Argument \'method\' must be specified as either str or list.')

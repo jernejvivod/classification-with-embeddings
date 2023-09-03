@@ -25,6 +25,10 @@ class CompositeEmbedder(ADocEmbedder):
 
         return np.hstack(embeddings)
 
+    def set_params(self, **params):
+        for idx, k in enumerate(sorted(params.keys())):
+            self.embedders[idx].set_params(embedding_kwargs=params[k])
+
     @staticmethod
     def _transform_sentence_lists_to_list_of_lists_of_sentences(sentences: List[List[List[str]]]) -> List[List[List[str]]]:
         """Transform data to lists of:
