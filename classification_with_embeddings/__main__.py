@@ -7,11 +7,9 @@ from sklearn.dummy import DummyClassifier
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.svm import SVC
-from torch.utils.data import DataLoader
 
 from classification_with_embeddings import Tasks, EntityEmbeddingMethod, InternalClassifier, torch_device
 from classification_with_embeddings import logger
-from classification_with_embeddings.embedding.cnn.dataset import FastTextFormatDataset
 from classification_with_embeddings.embedding.cnn.train import train_cnn_model
 from classification_with_embeddings.embedding.embed import get_starspace_embeddings, get_doc2vec_embeddings, \
     get_fasttext_embeddings, get_word2vec_embeddings
@@ -24,6 +22,7 @@ from classification_with_embeddings.train_test_split.train_test_split import get
 from classification_with_embeddings.util.argparse import file_path, dir_path, proportion_float, positive_int
 from classification_with_embeddings.util.arguments import get_train_and_val_paths_for_multiple_train_files, \
     parse_param_grid
+from classification_with_embeddings.util.dataloader import get_dataloader
 
 
 def main(argv=None):
@@ -97,10 +96,10 @@ def _add_subparser_for_train_cnn_model(subparsers):
     train_cnn_model_parser = subparsers.add_parser(Tasks.TRAIN_CNN_MODEL.value)
     train_cnn_model_parser.add_argument('--train-data-path', type=file_path, required=True, nargs='+',
                                         action=UnnestSingletonListElement,
-                                        help='Path to file containing the training data in FastText format')
+                                        help='Path to file(s) containing the training data in FastText format')
     train_cnn_model_parser.add_argument('--word-embeddings-path', type=file_path, required=True, nargs='+',
                                         action=UnnestSingletonListElement,
-                                        help='Path to file containing the word embeddings in TSV format')
+                                        help='Path to file(s) containing the word embeddings in TSV format')
     train_cnn_model_parser.add_argument('--n-labels', type=positive_int, required=True,
                                         help='Number of unique labels in the dataset')
     train_cnn_model_parser.add_argument('--val-data-path', type=file_path, default=None, nargs='+',
@@ -148,11 +147,11 @@ def _add_subparser_for_evaluate_embeddings_model(subparsers):
                                                   help='Entity embedding method to evaluate_embeddings_model')
     evaluate_embeddings_model_parser.add_argument('--train-data-path', type=file_path, nargs='+', required=True,
                                                   action=UnnestSingletonListElement,
-                                                  help='Path to file containing the training data in fastText format'
+                                                  help='Path to file(s) containing the training data in fastText format'
                                                        ' (for training internal classifiers)')
     evaluate_embeddings_model_parser.add_argument('--test-data-path', type=file_path, nargs='+', required=True,
                                                   action=UnnestSingletonListElement,
-                                                  help='Path to file containing the test data in fastText format')
+                                                  help='Path to file(s) containing the test data in fastText format')
     evaluate_embeddings_model_parser.add_argument('--validation-size', type=proportion_float, default=0.3,
                                                   help='Proportion of the dataset to use for hyperparameter tuning')
     evaluate_embeddings_model_parser.add_argument('--no-stratify', action='store_true',
@@ -190,8 +189,9 @@ def _add_subparser_for_evaluate_cnn_model(subparsers):
     evaluate_cnn_model_parser = subparsers.add_parser(Tasks.EVALUATE_CNN_MODEL.value)
     evaluate_cnn_model_parser.add_argument('--model-path', type=file_path, required=True,
                                            help='Path to trained model to evaluate')
-    evaluate_cnn_model_parser.add_argument('--test-data-path', type=file_path, required=True,
-                                           help='Path to file containing the test data in fastText format')
+    evaluate_cnn_model_parser.add_argument('--test-data-path', type=file_path, nargs='+', required=True,
+                                           action=UnnestSingletonListElement,
+                                           help='Path to file(s) containing the test data in fastText format')
     evaluate_cnn_model_parser.add_argument('--unique-labels', type=int, nargs='+', required=True,
                                            help='Unique labels present in the dataset')
     evaluate_cnn_model_parser.add_argument('--class-names', type=str, nargs='+', required=True,
@@ -276,9 +276,7 @@ def _task_evaluate_embeddings_model(parsed_args: dict):
 def _task_evaluate_cnn_model(parsed_args: dict):
     model = torch.load(parsed_args['model_path'], map_location=torch_device)
 
-    test_dataset = FastTextFormatDataset(parsed_args['test_data_path'])
-    test_data_loader = DataLoader(test_dataset, shuffle=True, batch_size=parsed_args['batch_size'],
-                                  collate_fn=FastTextFormatDataset.collate)
+    test_data_loader = get_dataloader(parsed_args['test_data_path'], batch_size=parsed_args['batch_size'])
 
     evaluate_cnn_model(
         model,

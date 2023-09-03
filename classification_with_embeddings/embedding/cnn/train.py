@@ -10,11 +10,11 @@ from tqdm.auto import tqdm
 
 from classification_with_embeddings import torch_device
 from classification_with_embeddings.embedding import logger
-from classification_with_embeddings.embedding.cnn.dataset import FastTextFormatDataset, FastTextFormatCompositeDataset
 from classification_with_embeddings.embedding.cnn.model.cnn_model import CnnTextClassificationModel
 from classification_with_embeddings.embedding.cnn.model.multi_dataset_cnn_model import \
     CompositeCnnTextClassificationModel
 from classification_with_embeddings.embedding.embed_util import get_word_to_embedding
+from classification_with_embeddings.util.dataloader import get_dataloader
 
 
 def train_cnn_model(
@@ -60,7 +60,6 @@ def train_cnn_model(
             word_to_embedding_nxt = {k: torch.tensor(v).float().to(torch_device) for k, v in
                                      get_word_to_embedding(path, False).items()}
             word_to_embedding.append(word_to_embedding_nxt)
-
 
     # initialize model
     if not (isinstance(train_data_path, str) or isinstance(train_data_path, list)):
@@ -123,7 +122,6 @@ def train_cnn_model(
                 optimizer.step()
                 optimizer.zero_grad()
 
-
             progress_bar.update(1)
 
             torch.cuda.empty_cache()
@@ -163,15 +161,3 @@ def validate_and_save_model(model: nn.Module, val_data_loader: DataLoader, epoch
 
     # model will continue to be trained
     model.train()
-
-
-def get_dataloader(train_data_path: Union[str, List[str]], batch_size: int):
-    if isinstance(train_data_path, str):
-        dataset = FastTextFormatDataset(train_data_path)
-        return DataLoader(dataset, shuffle=True, batch_size=batch_size, collate_fn=FastTextFormatDataset.collate)
-    elif isinstance(train_data_path, list):
-        dataset = FastTextFormatCompositeDataset(train_data_path)
-        return DataLoader(dataset, shuffle=True, batch_size=batch_size, collate_fn=FastTextFormatCompositeDataset.collate)
-    else:
-        raise ValueError('Specified training data path(s) should be a str or a list.')
-
