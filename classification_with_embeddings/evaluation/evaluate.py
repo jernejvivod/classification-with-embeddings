@@ -30,7 +30,7 @@ def evaluate_embeddings_model(clf: AClassifier,
 
     logger.info('Computing predicted labels.')
 
-    method_name = method if isinstance(method, str) else ', '.join(method)
+    method_name = method if isinstance(method, str) else '_'.join(method)
 
     test_sentences, y_true = _fasttext_data_to_x_y(test_data_path) \
         if isinstance(test_data_path, str) else _fasttext_data_to_x_y_multiple(test_data_path)
@@ -56,7 +56,7 @@ def evaluate_embeddings_model(clf: AClassifier,
 
     # write evaluation data to file
     write_evaluation_prediction_data_to_file(
-        method,
+        method_name,
         results_path,
         y_pred.tolist(),
         y_proba,
@@ -94,7 +94,7 @@ def evaluate_cnn_model(model: torch.nn.Module,
     predicted_proba = torch.empty((0, 2)).to(torch_device)
     y_true = torch.empty(0, dtype=torch.int64).to(torch_device)
 
-    progress_bar = tqdm(range(len(test_data_loader)), desc="Training network", unit=" steps")
+    progress_bar = tqdm(range(len(test_data_loader)), desc="Evaluating model", unit=" steps")
     with torch.no_grad():
         for batch in test_data_loader:
             # get inputs and labels for next batch
