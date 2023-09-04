@@ -12,6 +12,7 @@ from classification_with_embeddings.util.errors import EmbeddingError
 
 class StarspaceDocEmbedder(ADocEmbedder):
     _TMP_TRAINING_DATA_PATH = './train_data_starspace.txt'
+    _TMP_PREDICT_DATA_PATH = './predict_data_starspace.txt'
     _TMP_STARSPACE_MODEL_NAME = 'starspace_model'
 
     def __init__(self, embedding_kwargs: Optional[dict] = None, **model_init_kwargs):
@@ -34,9 +35,19 @@ class StarspaceDocEmbedder(ADocEmbedder):
 
         word_to_embedding = embed_util.get_word_to_embedding('./starspace_model.tsv')
 
-        self._remove_tmp_files()
+        # self._remove_tmp_files()
 
         return word_to_embedding
+
+    def transform(self, X: List[List[str]]):
+        self._write_prediction_data_to_file(X)
+        p = subprocess.run(
+            [os.path.join(os.path.dirname(self.starspace_path), 'embed_doc'), './' + self._TMP_STARSPACE_MODEL_NAME, self._TMP_PREDICT_DATA_PATH],
+            stdout=subprocess.PIPE,
+            text=True
+        )
+        # TODO remove prediction file
+        return np.array(list(map(lambda x: [float(e) for e in x.strip().split(' ')], p.stdout.split('\n')[5::2])))
 
     def _write_training_data_to_file(self, train_sentences: Union[List[List[str]], Iterator], y: list):
         # write training data to file
@@ -46,10 +57,15 @@ class StarspaceDocEmbedder(ADocEmbedder):
                 f.write(' ' + LABEL_WORD_PREFIX + str(y[idx]))
                 f.write('\n')
 
+    def _write_prediction_data_to_file(self, predict_sentences: Union[List[List[str]], Iterator]):
+        # write training data to file
+        with open(self._TMP_PREDICT_DATA_PATH, 'w') as f:
+            for idx in range(len(predict_sentences)):
+                f.write(' '.join(predict_sentences[idx]))
+                f.write('\n')
+
     def _remove_tmp_files(self):
         os.remove(self._TMP_TRAINING_DATA_PATH)
-        os.remove(self._TMP_STARSPACE_MODEL_NAME)
-        os.remove(self._TMP_STARSPACE_MODEL_NAME + '.tsv')
 
     def _embedding_kwargs_to_starspace_params(self) -> List[str]:
         res = []

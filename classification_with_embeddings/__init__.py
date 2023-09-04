@@ -33,6 +33,7 @@ class InternalClassifier(Enum):
     RANDOM_FOREST = 'random-forest'
     SVC = 'svc'
     GRADIENT_BOOSTING = 'gradient-boosting'
+    STARSPACE = 'starspace'
     DUMMY = 'dummy'
 
 

@@ -15,6 +15,7 @@ from classification_with_embeddings.embedding.embed import get_starspace_embeddi
     get_fasttext_embeddings, get_word2vec_embeddings
 from classification_with_embeddings.embedding.embed_util import get_word_to_embedding
 from classification_with_embeddings.evaluation.clf.a_classifier import AClassifier
+from classification_with_embeddings.evaluation.clf.starspace_classifier import StarSpaceClassifier
 from classification_with_embeddings.evaluation.evaluate import evaluate_embeddings_model, evaluate_cnn_model
 from classification_with_embeddings.evaluation.get_clf import get_clf_with_internal_clf, get_clf_starspace, \
     get_clf_with_internal_clf_doc2vec, get_clf_with_internal_clf_gs
@@ -372,6 +373,8 @@ def _get_clf_gs(parsed_args: dict) -> AClassifier:
 
 
 def _get_internal_clf(internal_clf_kind: str):
+    if internal_clf_kind == InternalClassifier.STARSPACE.value:
+        return StarSpaceClassifier
     if internal_clf_kind == InternalClassifier.LOGISTIC_REGRESSION.value:
         return LogisticRegression
     elif internal_clf_kind == InternalClassifier.RANDOM_FOREST.value:

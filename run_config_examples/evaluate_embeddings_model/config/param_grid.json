@@ -1,5 +1,6 @@
 {
   "embedding__embedding_kwargs": {
-    "vector_size": 400
+    "dim": 300,
+    "epoch": 5
   }
 }
