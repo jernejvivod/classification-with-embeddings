@@ -49,7 +49,7 @@ evaluate_command="python3 $script_path/../../classification_with_embeddings \
 if [[ -n "$method" ]]; then
   evaluate_command+="--method $method "
 
-  if [[ "$method" == "starspace" ]]; then
+  if [[ "$method" == *starspace* ]]; then
     evaluate_command+="--starspace-path $script_path/../../embedding_methods/StarSpace/starspace "
   fi
 fi

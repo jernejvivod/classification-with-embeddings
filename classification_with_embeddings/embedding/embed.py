@@ -4,6 +4,7 @@ import subprocess
 from gensim.models import Word2Vec, FastText
 from gensim.models.doc2vec import TaggedDocument, Doc2Vec
 
+from classification_with_embeddings import LABEL_WORD_PREFIX
 from classification_with_embeddings.evaluation.embedders.a_doc_embedder import ADocEmbedder
 from classification_with_embeddings.util.arguments import process_param_spec
 from classification_with_embeddings.util.errors import EmbeddingError
@@ -101,13 +102,15 @@ def get_doc_embedder_instance(method: str,
     :param a_doc_embedder_kwargs: additional keyword arguments to pass to the ADocEmbedder instance constructor
     """
 
+    y = _parse_target_from_file(train_data_path)
+
     with SentenceIteratorFastTextFormat(train_data_path) as sent_it:
         model_params = _parse_params_or_get_default(method_args, {})
 
         # get model
         doc_embedder = ADocEmbedder.factory(method, **a_doc_embedder_kwargs)
         doc_embedder.method_kwargs = model_params
-        doc_embedder.fit(sent_it, None)
+        doc_embedder.fit(sent_it, y)
 
     return doc_embedder
 
@@ -140,3 +143,16 @@ def _save_wv_to_file(model, output_dir: str, output_file_name: str) -> str:
             key = model.wv.index_to_key[idx]
             f.write(key + '\t' + '\t'.join(map(str, emb)) + '\n')
     return out_path
+
+
+def _parse_target_from_file(train_data_path: str):
+    """Parse target variable values from file in FastText format.
+
+    :param train_data_path: path to training data in fastText format
+    """
+
+    res = []
+    with open(train_data_path, 'r') as f:
+        for line in f:
+            res.append(line.split(' ')[-1][len(LABEL_WORD_PREFIX):-1])
+    return res

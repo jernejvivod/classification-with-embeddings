@@ -52,8 +52,8 @@ class StarspaceDocEmbedder(ADocEmbedder):
     def _write_training_data_to_file(self, train_sentences: Union[List[List[str]], Iterator], y: list):
         # write training data to file
         with open(self._TMP_TRAINING_DATA_PATH, 'w') as f:
-            for idx in range(len(train_sentences)):
-                f.write(' '.join(train_sentences[idx]))
+            for idx, sent in enumerate(train_sentences):
+                f.write(' '.join(sent))
                 f.write(' ' + LABEL_WORD_PREFIX + str(y[idx]))
                 f.write('\n')
 
