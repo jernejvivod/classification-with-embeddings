@@ -130,6 +130,6 @@ def evaluate_cnn_model(model: torch.nn.Module,
         results_path,
         y_pred.tolist(),
         predicted_proba_numpy,
-        y_true,
+        y_true.tolist(),
         class_names
     )
