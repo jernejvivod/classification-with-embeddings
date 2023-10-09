@@ -7,7 +7,7 @@ dask-ml==2022.5.27
 distributed==2022.5.2
 fonttools==4.33.3
 fsspec==2022.5.0
-gensim==4.2.0
+gensim==4.3.2
 HeapDict==1.0.1
 Jinja2==3.1.2
 joblib==1.1.1
